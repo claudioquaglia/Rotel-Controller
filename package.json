@@ -11,14 +11,17 @@
   ],
   "bin": "dist/index.js",
   "scripts": {
-    "start": "tsdx watch",
-    "build": "tsdx build",
+    "start": "tsdx watch --target node",
+    "build": "tsdx build --target node",
     "test": "tsdx test",
-    "lint": "tsdx lint"
+    "lint": "tsdx lint",
+    "commit": "git-cz",
+    "release": "standard-version --no-verify --sign"
   },
   "peerDependencies": {},
   "husky": {
     "hooks": {
+      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true",
       "pre-commit": "tsdx lint"
     }
   },
@@ -31,11 +34,19 @@
   "devDependencies": {
     "@types/debug": "^4.1.5",
     "@types/jest": "^24.0.22",
+    "commitizen": "^4.0.3",
+    "cz-conventional-changelog": "^3.0.2",
     "debug": "^4.1.1",
     "husky": "^3.0.9",
+    "standard-version": "^7.0.0",
     "tsdx": "^0.11.0",
     "tslib": "^1.10.0",
     "typescript": "^3.7.2"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
 }
