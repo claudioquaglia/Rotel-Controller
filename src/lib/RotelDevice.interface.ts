@@ -1,5 +1,5 @@
-export enum Sources {
-  'opt' = 'OPT1',
+export enum SOURCES {
+  OPT1 = 'OPT1',
 }
 
 export interface RotelDeviceConfigInterface {

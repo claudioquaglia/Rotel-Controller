@@ -1,9 +1,12 @@
-import net from 'net';
-import debug from 'debug';
+import net, { isIPv4 } from 'net';
+import debug, { Debugger } from 'debug';
 import { EventEmitter } from 'events';
 import { RotelDeviceConfigInterface, Sources } from './RotelDevice.interface';
 
 class RotelDevice extends EventEmitter {
+  // Class Logger
+  private readonly debug: Debugger;
+
   // Device minimum volume
   // @ts-ignore
   private readonly VOLUME_MIN: number = 0;
@@ -52,9 +55,12 @@ class RotelDevice extends EventEmitter {
   constructor({ host }: RotelDeviceConfigInterface) {
     super();
 
-    debug('Initializing Rotel Device');
+    this.debug = debug('RotelDevice');
+
+    this.debug('Initializing Rotel Device...');
 
     if (!host) throw new Error("Missing device host. It's required.");
+    if (!isIPv4(host)) throw new Error('Host should be a valid IPv4 format.');
 
     this.host = host;
 
@@ -86,28 +92,27 @@ class RotelDevice extends EventEmitter {
   }
 
   private connectionOpened() {
-    debug('connected');
+    this.debug('connected');
   }
 
   private connectionClosed() {
-    debug('close');
+    this.debug('close');
   }
 
   private connectionEnded() {
-    debug('end');
+    this.debug('end');
   }
 
   private connectionError() {
-    debug('error');
+    this.debug('error');
   }
 
   private connectionTimeouted() {
-    debug('timeout');
+    this.debug('timeout');
   }
 
-  private connectionData(data: string) {
-    debug('data');
-    console.log('data', data);
+  private connectionData(data: any) {
+    this.debug('data %o', data);
   }
 
   /**

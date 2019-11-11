@@ -1,4 +1,4 @@
-import RotelDevice from './RotelDevice';
+import RotelDevice from './lib/RotelDevice';
 
 // @ts-ignore
 const device = new RotelDevice({ host: '192.168.1.135' });
