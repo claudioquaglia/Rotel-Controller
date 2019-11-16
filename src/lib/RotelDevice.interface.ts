@@ -1,7 +1,3 @@
-export enum SOURCES {
-  OPT1 = 'OPT1',
-}
-
-export interface RotelDeviceConfigInterface {
+export interface IRotelDeviceConfig {
   host: string;
 }

@@ -1,22 +1,23 @@
 import net, { isIPv4 } from 'net';
 import debug, { Debugger } from 'debug';
 import { EventEmitter } from 'events';
-import { RotelDeviceConfigInterface, Sources } from './RotelDevice.interface';
+import { IRotelDeviceConfig } from './RotelDevice.interface';
 
 class RotelDevice extends EventEmitter {
   // Class Logger
   private readonly debug: Debugger;
 
+  // Device IP port
+  private readonly DEVICE_PORT: number = 9590;
+
   // Device minimum volume
   // @ts-ignore
   private readonly VOLUME_MIN: number = 0;
 
-  // Device IP port
-  private readonly DEVICE_PORT: number = 9590;
-
   // Device maximum volume
+  // Setted to 96, 'cause is the max value assignable by IPC
   // @ts-ignore
-  private readonly VOLUME_MAX: number = 99;
+  private readonly VOLUME_MAX: number = 96;
 
   // Connection attempt is running
   // @ts-ignore
@@ -36,7 +37,7 @@ class RotelDevice extends EventEmitter {
 
   // Selected source
   // @ts-ignore
-  private source: Sources = Sources.opt;
+  private source: string = 'source';
 
   // Device is turned ON
   // @ts-ignore
@@ -52,7 +53,7 @@ class RotelDevice extends EventEmitter {
   // @ts-ignore
   private connectTime: number;
 
-  constructor({ host }: RotelDeviceConfigInterface) {
+  constructor({ host }: IRotelDeviceConfig) {
     super();
 
     this.debug = debug('RotelDevice');
