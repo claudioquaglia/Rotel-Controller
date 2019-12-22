@@ -2,6 +2,7 @@ import net, { isIPv4 } from 'net';
 import debug, { Debugger } from 'debug';
 import { EventEmitter } from 'events';
 import { IRotelDeviceConfig } from './RotelDevice.interface';
+// import { Commands, CommandResponses } from './commands';
 
 class RotelDevice extends EventEmitter {
   // Class Logger
@@ -37,7 +38,7 @@ class RotelDevice extends EventEmitter {
 
   // Selected source
   // @ts-ignore
-  private source: string = 'source';
+  private source: string = '';
 
   // Device is turned ON
   // @ts-ignore
@@ -57,7 +58,6 @@ class RotelDevice extends EventEmitter {
     super();
 
     this.debug = debug('RotelDevice');
-
     this.debug('Initializing Rotel Device...');
 
     if (!host) throw new Error("Missing device host. It's required.");
@@ -89,6 +89,7 @@ class RotelDevice extends EventEmitter {
       this.socket.connect(this.DEVICE_PORT, this.host);
     } catch (error) {
       this.emit('error', error.toString());
+      this.debug('Fail to connect to Rotel Device due to', error.toString());
     }
   }
 
@@ -98,14 +99,16 @@ class RotelDevice extends EventEmitter {
 
   private connectionClosed() {
     this.debug('close');
+    this.connecting = false;
+    this.connected = false;
   }
 
   private connectionEnded() {
     this.debug('end');
   }
 
-  private connectionError() {
-    this.debug('error');
+  private connectionError(error: Error) {
+    console.log('error', error);
   }
 
   private connectionTimeouted() {
@@ -123,6 +126,24 @@ class RotelDevice extends EventEmitter {
     this.emit('connecting');
     this.openSocketConnection();
   }
+
+  /**
+   * Close TCP socket connection with device;
+   */
+  disconnect() {
+    if (this.socket && this.connected) {
+      this.socket.destroy();
+    }
+  }
+
+  /**
+   * Send IPC command to the connected device
+   */
+  sendCommand(command: any) {
+    this.debug('send command', command);
+  }
+
+  test() {}
 }
 
 export default RotelDevice;
