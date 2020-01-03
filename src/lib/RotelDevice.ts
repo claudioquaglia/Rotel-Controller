@@ -1,8 +1,8 @@
-import net, { isIPv4 } from 'net';
+import { Socket, isIPv4 } from 'net';
 import debug, { Debugger } from 'debug';
 import { EventEmitter } from 'events';
 import { IRotelDeviceConfig } from './RotelDevice.interface';
-// import { Commands, CommandResponses } from './commands';
+// import { Commands } from './commands';
 
 class RotelDevice extends EventEmitter {
   // Class Logger
@@ -20,39 +20,30 @@ class RotelDevice extends EventEmitter {
   // @ts-ignore
   private readonly VOLUME_MAX: number = 96;
 
+  // Device host IPv4 address
+  private readonly host: string;
+
   // Connection attempt is running
   // @ts-ignore
   private connecting: boolean = false;
 
   // Socket is connected to the Amp
-  // @ts-ignore
   private connected: boolean = false;
 
   // Current device volume
-  // @ts-ignore
-  private volume: number = 0;
+  private _volume: number = 0;
 
   // Is device muted
-  // @ts-ignore
-  private muted: boolean = false;
+  private _muted: boolean = false;
 
   // Selected source
-  // @ts-ignore
-  private source: string = '';
-
-  // Device is turned ON
-  // @ts-ignore
-  private power: boolean = false;
-
-  // Device host IPv4 address
-  private host: string;
+  private _source: string = '';
 
   // Network socket
-  // @ts-ignore
-  private socket: net.Socket;
+  private socket: Socket | null = null;
 
   // @ts-ignore
-  private connectTime: number;
+  private connectTime: number = 0;
 
   constructor({ host }: IRotelDeviceConfig) {
     super();
@@ -69,17 +60,18 @@ class RotelDevice extends EventEmitter {
   }
 
   private openSocketConnection() {
-    this.socket = new net.Socket();
+    this.debug('Opening socket connection');
+    this.socket = new Socket();
     this.socket.setEncoding('ascii');
     this.socket.setNoDelay(true);
 
     // Bind events
-    this.socket.on('open', this.connectionOpened);
-    this.socket.on('close', this.connectionClosed);
-    this.socket.on('error', this.connectionError);
-    this.socket.on('end', this.connectionEnded);
-    this.socket.on('timeout', this.connectionTimeouted);
-    this.socket.on('data', this.connectionData);
+    this.socket.on('connect', this.connectionOpened.bind(this));
+    this.socket.on('close', this.connectionClosed.bind(this));
+    this.socket.on('error', this.connectionError.bind(this));
+    this.socket.on('end', this.connectionEnded.bind(this));
+    this.socket.on('timeout', this.connectionTimeouted.bind(this));
+    this.socket.on('data', this.connectionData.bind(this));
 
     this.connectTime = new Date().getTime();
     this.connecting = true;
@@ -89,12 +81,16 @@ class RotelDevice extends EventEmitter {
       this.socket.connect(this.DEVICE_PORT, this.host);
     } catch (error) {
       this.emit('error', error.toString());
-      this.debug('Fail to connect to Rotel Device due to', error.toString());
+      this.debug('Fail to connect to Rotel Device due to %s', error.toString());
     }
   }
 
   private connectionOpened() {
     this.debug('connected');
+    this.emit('connected');
+    this.connecting = false;
+    this.connected = true;
+    this.socket!.write('discover?');
   }
 
   private connectionClosed() {
@@ -108,7 +104,8 @@ class RotelDevice extends EventEmitter {
   }
 
   private connectionError(error: Error) {
-    console.log('error', error);
+    this.debug('error %o', error);
+    this.emit('error %o', error);
   }
 
   private connectionTimeouted() {
@@ -131,19 +128,48 @@ class RotelDevice extends EventEmitter {
    * Close TCP socket connection with device;
    */
   disconnect() {
+    this.debug('disconnecting from device');
     if (this.socket && this.connected) {
       this.socket.destroy();
+      this.debug('Socket destroied');
     }
   }
 
   /**
    * Send IPC command to the connected device
    */
-  sendCommand(command: any) {
-    this.debug('send command', command);
+  public sendCommand(command: any) {
+    if (!this.socket) return;
+
+    this.debug('sending command', command);
+    this.socket.write(command);
   }
 
-  test() {}
+  public getActiveProperties() {}
+
+  public get volume(): number {
+    return this._volume;
+  }
+
+  public set volume(value: number) {
+    this._volume = value;
+  }
+
+  public get source(): string {
+    return this._source;
+  }
+
+  public set source(value: string) {
+    this._source = value;
+  }
+
+  public get muted(): boolean {
+    return this._muted;
+  }
+
+  public set muted(value: boolean) {
+    this._muted = value;
+  }
 }
 
 export default RotelDevice;
