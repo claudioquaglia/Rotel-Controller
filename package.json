@@ -41,7 +41,7 @@
     "husky": "^4.0.7",
     "mitm": "^1.7.0",
     "standard-version": "^7.0.1",
-    "tsdx": "^0.12.1",
+    "tsdx": "^0.12.3",
     "tslib": "^1.10.0",
     "typescript": "^3.7.4"
   },
