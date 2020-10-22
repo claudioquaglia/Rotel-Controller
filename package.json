@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
-    "@types/jest": "^26.0.14",
+    "@types/jest": "^26.0.15",
     "@types/mitm": "^1.3.3",
     "commitizen": "^4.2.1",
     "cz-conventional-changelog": "^3.3.0",
